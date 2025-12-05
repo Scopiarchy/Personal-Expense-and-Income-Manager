@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 import { toast } from "sonner";
 
 interface Category {
@@ -104,17 +104,58 @@ const Categories = () => {
   const incomeCategories = categories.filter(c => c.type === "income");
   const expenseCategories = categories.filter(c => c.type === "expense");
 
+  const CategoryCard = ({ category }: { category: Category }) => (
+    <div className="group p-4 rounded-2xl bg-card border border-border hover:shadow-soft transition-all duration-300 card-hover">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm"
+            style={{ backgroundColor: category.color + '20' }}
+          >
+            <div
+              className="w-6 h-6 rounded-lg"
+              style={{ backgroundColor: category.color }}
+            />
+          </div>
+          <div>
+            <span className="font-semibold text-card-foreground">{category.name}</span>
+            <p className="text-xs text-muted-foreground capitalize">{category.type}</p>
+          </div>
+        </div>
+        {category.user_id && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+            onClick={() => handleDelete(category.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      {category.budget_limit && category.budget_limit > 0 && (
+        <div className="mt-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Budget Limit</span>
+            <span className="font-medium text-card-foreground">${category.budget_limit.toLocaleString()}</span>
+          </div>
+          <Progress value={0} className="h-2" />
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Categories</h1>
-            <p className="text-muted-foreground">Organize your transactions with categories</p>
+            <h1 className="text-3xl font-bold text-foreground">Categories</h1>
+            <p className="text-muted-foreground mt-1">Organize your transactions with custom categories</p>
           </div>
           <Button 
-            className="bg-gradient-primary hover:opacity-90"
+            className="bg-gradient-primary hover:opacity-90 shadow-soft text-white"
             onClick={() => setShowAddModal(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -122,44 +163,61 @@ const Categories = () => {
           </Button>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card className="border-0 shadow-soft bg-gradient-to-br from-success/10 to-success/5">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-success" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Income Categories</p>
+                  <p className="text-2xl font-bold text-foreground">{incomeCategories.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-soft bg-gradient-to-br from-destructive/10 to-destructive/5">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-destructive/20 flex items-center justify-center">
+                  <TrendingDown className="h-6 w-6 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Expense Categories</p>
+                  <p className="text-2xl font-bold text-foreground">{expenseCategories.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Income Categories */}
         <Card className="border-0 shadow-soft">
-          <CardHeader>
-            <CardTitle className="text-success">Income Categories</CardTitle>
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-success" />
+              </div>
+              <CardTitle className="text-xl text-foreground">Income Categories</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-24 bg-muted animate-pulse rounded-2xl" />
                 ))}
               </div>
             ) : incomeCategories.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No income categories yet.</p>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No income categories yet. Add your first one!</p>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {incomeCategories.map((category) => (
-                  <div
-                    key={category.id}
-                    className="flex items-center justify-between p-4 rounded-xl bg-muted/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-lg"
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <span className="font-medium">{category.name}</span>
-                    </div>
-                    {category.user_id && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(category.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    )}
-                  </div>
+                  <CategoryCard key={category.id} category={category} />
                 ))}
               </div>
             )}
@@ -168,53 +226,29 @@ const Categories = () => {
 
         {/* Expense Categories */}
         <Card className="border-0 shadow-soft">
-          <CardHeader>
-            <CardTitle className="text-destructive">Expense Categories</CardTitle>
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
+                <TrendingDown className="h-5 w-5 text-destructive" />
+              </div>
+              <CardTitle className="text-xl text-foreground">Expense Categories</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="h-24 bg-muted animate-pulse rounded-2xl" />
                 ))}
               </div>
             ) : expenseCategories.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No expense categories yet.</p>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No expense categories yet. Add your first one!</p>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {expenseCategories.map((category) => (
-                  <div
-                    key={category.id}
-                    className="p-4 rounded-xl bg-muted/50 space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-lg"
-                          style={{ backgroundColor: category.color }}
-                        />
-                        <span className="font-medium">{category.name}</span>
-                      </div>
-                      {category.user_id && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(category.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      )}
-                    </div>
-                    {category.budget_limit && category.budget_limit > 0 && (
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Budget</span>
-                          <span>${category.budget_limit}</span>
-                        </div>
-                        <Progress value={0} className="h-2" />
-                      </div>
-                    )}
-                  </div>
+                  <CategoryCard key={category.id} category={category} />
                 ))}
               </div>
             )}
@@ -224,31 +258,32 @@ const Categories = () => {
 
       {/* Add Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent>
+        <DialogContent className="bg-card border-border">
           <DialogHeader>
-            <DialogTitle>Add Category</DialogTitle>
+            <DialogTitle className="text-foreground">Add Category</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label className="text-foreground">Name</Label>
               <Input
                 placeholder="Category name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                className="bg-background border-border text-foreground"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Type</Label>
+              <Label className="text-foreground">Type</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) => setFormData({ ...formData, type: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border-border">
                   <SelectItem value="income">Income</SelectItem>
                   <SelectItem value="expense">Expense</SelectItem>
                 </SelectContent>
@@ -256,14 +291,16 @@ const Categories = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Color</Label>
+              <Label className="text-foreground">Color</Label>
               <div className="flex flex-wrap gap-2">
                 {colorOptions.map((color) => (
                   <button
                     key={color}
                     type="button"
-                    className={`w-8 h-8 rounded-lg transition-transform ${
-                      formData.color === color ? "ring-2 ring-primary ring-offset-2 scale-110" : ""
+                    className={`w-8 h-8 rounded-lg transition-all duration-200 ${
+                      formData.color === color 
+                        ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110" 
+                        : "hover:scale-105"
                     }`}
                     style={{ backgroundColor: color }}
                     onClick={() => setFormData({ ...formData, color })}
@@ -274,21 +311,27 @@ const Categories = () => {
 
             {formData.type === "expense" && (
               <div className="space-y-2">
-                <Label>Budget Limit (optional)</Label>
+                <Label className="text-foreground">Budget Limit (optional)</Label>
                 <Input
                   type="number"
                   placeholder="0.00"
                   value={formData.budget_limit}
                   onChange={(e) => setFormData({ ...formData, budget_limit: e.target.value })}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             )}
 
             <div className="flex gap-2 pt-4">
-              <Button type="button" variant="outline" className="flex-1" onClick={() => setShowAddModal(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1 border-border text-foreground hover:bg-muted" 
+                onClick={() => setShowAddModal(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1 bg-gradient-primary">
+              <Button type="submit" className="flex-1 bg-gradient-primary text-white hover:opacity-90">
                 Add Category
               </Button>
             </div>
