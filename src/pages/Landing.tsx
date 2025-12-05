@@ -9,9 +9,11 @@ import {
   Target, 
   Shield, 
   Zap,
-  CheckCircle
+  CheckCircle,
+  Sun,
+  Moon
 } from "lucide-react";
-
+import { useTheme } from "@/hooks/useTheme";
 const features = [
   {
     icon: BarChart3,
@@ -46,6 +48,12 @@ const features = [
 ];
 
 const Landing = () => {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
@@ -70,6 +78,18 @@ const Landing = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
+            >
+              {resolvedTheme === "dark" ? (
+                <Sun className="h-5 w-5 text-yellow-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-slate-700" />
+              )}
+            </Button>
             <Link to="/auth">
               <Button variant="ghost">Sign In</Button>
             </Link>

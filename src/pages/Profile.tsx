@@ -26,11 +26,27 @@ interface Profile {
 }
 
 const currencies = [
-  { value: "USD", label: "USD ($)" },
-  { value: "EUR", label: "EUR (€)" },
-  { value: "GBP", label: "GBP (£)" },
-  { value: "INR", label: "INR (₹)" },
-  { value: "JPY", label: "JPY (¥)" },
+  { value: "LKR", label: "LKR (Rs) - Sri Lankan Rupee" },
+  { value: "USD", label: "USD ($) - US Dollar" },
+  { value: "EUR", label: "EUR (€) - Euro" },
+  { value: "GBP", label: "GBP (£) - British Pound" },
+  { value: "INR", label: "INR (₹) - Indian Rupee" },
+  { value: "JPY", label: "JPY (¥) - Japanese Yen" },
+  { value: "CNY", label: "CNY (¥) - Chinese Yuan" },
+  { value: "AUD", label: "AUD ($) - Australian Dollar" },
+  { value: "CAD", label: "CAD ($) - Canadian Dollar" },
+  { value: "CHF", label: "CHF (Fr) - Swiss Franc" },
+  { value: "SGD", label: "SGD ($) - Singapore Dollar" },
+  { value: "AED", label: "AED (د.إ) - UAE Dirham" },
+  { value: "SAR", label: "SAR (﷼) - Saudi Riyal" },
+  { value: "MYR", label: "MYR (RM) - Malaysian Ringgit" },
+  { value: "THB", label: "THB (฿) - Thai Baht" },
+  { value: "KRW", label: "KRW (₩) - South Korean Won" },
+  { value: "BRL", label: "BRL (R$) - Brazilian Real" },
+  { value: "ZAR", label: "ZAR (R) - South African Rand" },
+  { value: "NZD", label: "NZD ($) - New Zealand Dollar" },
+  { value: "PKR", label: "PKR (₨) - Pakistani Rupee" },
+  { value: "BDT", label: "BDT (৳) - Bangladeshi Taka" },
 ];
 
 const Profile = () => {
