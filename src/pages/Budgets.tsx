@@ -19,8 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Wallet, TrendingUp, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { budgetSchema, getValidationError } from "@/lib/validations";
 
 interface Budget {
   id: string;
@@ -43,13 +44,14 @@ const Budgets = () => {
   const [spending, setSpending] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [newBudget, setNewBudget] = useState({
     category_id: "",
     amount: ""
   });
 
-  const currentMonth = new Date().getMonth() + 1;
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
 
   useEffect(() => {
     fetchData();
@@ -69,42 +71,56 @@ const Budgets = () => {
       supabase
         .from("categories")
         .select("*")
-        .or(`user_id.eq.${user.id},is_default.eq.true`)
-        .eq("type", "expense"),
+        .eq("type", "expense")
+        .or(`user_id.eq.${user.id},is_default.eq.true`),
       supabase
         .from("transactions")
-        .select("*")
+        .select("category_id, amount")
         .eq("user_id", user.id)
         .eq("type", "expense")
-        .gte("date", `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`)
-        .lt("date", `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`)
+        .gte("date", `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`)
+        .lt("date", `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01`)
     ]);
 
     if (budgetsRes.data) setBudgets(budgetsRes.data);
     if (categoriesRes.data) setCategories(categoriesRes.data);
-    
+
+    // Calculate spending per category
+    const spendingMap: Record<string, number> = {};
     if (transactionsRes.data) {
-      const spendingByCategory: Record<string, number> = {};
       transactionsRes.data.forEach(t => {
         if (t.category_id) {
-          spendingByCategory[t.category_id] = (spendingByCategory[t.category_id] || 0) + Number(t.amount);
+          spendingMap[t.category_id] = (spendingMap[t.category_id] || 0) + Number(t.amount);
         }
       });
-      setSpending(spendingByCategory);
     }
-    
+    setSpending(spendingMap);
     setLoading(false);
   };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const result = budgetSchema.safeParse({
+      category_id: newBudget.category_id,
+      amount: parseFloat(newBudget.amount) || 0,
+      month: currentMonth,
+      year: currentYear
+    });
+    
+    if (!result.success) {
+      toast.error(getValidationError(result.error));
+      return;
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { error } = await supabase.from("budgets").insert({
       user_id: user.id,
-      category_id: formData.category_id || null,
-      amount: parseFloat(formData.amount),
+      category_id: newBudget.category_id,
+      amount: parseFloat(newBudget.amount),
       month: currentMonth,
       year: currentYear
     });
@@ -112,9 +128,9 @@ const Budgets = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Budget created!");
+      toast.success("Budget added successfully!");
       setShowAddModal(false);
-      setFormData({ category_id: "", amount: "" });
+      setNewBudget({ category_id: "", amount: "" });
       fetchData();
     }
   };
@@ -254,13 +270,13 @@ const Budgets = () => {
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
             <div className="space-y-2">
-              <Label>Category (optional)</Label>
+              <Label>Category</Label>
               <Select
-                value={formData.category_id}
-                onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                value={newBudget.category_id}
+                onValueChange={(value) => setNewBudget({ ...newBudget, category_id: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All categories" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
@@ -280,8 +296,8 @@ const Budgets = () => {
               <Input
                 type="number"
                 placeholder="0.00"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                value={newBudget.amount}
+                onChange={(e) => setNewBudget({ ...newBudget, amount: e.target.value })}
                 required
                 min="0.01"
                 step="0.01"

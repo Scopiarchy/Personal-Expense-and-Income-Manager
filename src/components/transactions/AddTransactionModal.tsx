@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { transactionSchema, getValidationError } from "@/lib/validations";
 
 interface Category {
   id: string;
@@ -36,7 +37,7 @@ interface AddTransactionModalProps {
 const AddTransactionModal = ({ open, onClose, onSuccess, categories }: AddTransactionModalProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    type: "expense",
+    type: "expense" as "income" | "expense",
     amount: "",
     category_id: "",
     date: new Date().toISOString().split("T")[0],
@@ -51,6 +52,23 @@ const AddTransactionModal = ({ open, onClose, onSuccess, categories }: AddTransa
     e.preventDefault();
     setLoading(true);
 
+    // Validate input
+    const result = transactionSchema.safeParse({
+      type: formData.type,
+      amount: parseFloat(formData.amount) || 0,
+      category_id: formData.category_id || null,
+      date: formData.date,
+      description: formData.description,
+      payment_method: formData.payment_method,
+      notes: formData.notes,
+    });
+
+    if (!result.success) {
+      toast.error(getValidationError(result.error));
+      setLoading(false);
+      return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast.error("Please sign in to add transactions");
@@ -64,9 +82,9 @@ const AddTransactionModal = ({ open, onClose, onSuccess, categories }: AddTransa
       amount: parseFloat(formData.amount),
       category_id: formData.category_id || null,
       date: formData.date,
-      description: formData.description || null,
+      description: formData.description.trim() || null,
       payment_method: formData.payment_method || null,
-      notes: formData.notes || null
+      notes: formData.notes.trim() || null
     });
 
     if (error) {
@@ -175,6 +193,7 @@ const AddTransactionModal = ({ open, onClose, onSuccess, categories }: AddTransa
               placeholder="e.g., Grocery shopping"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              maxLength={500}
             />
           </div>
 
@@ -206,6 +225,7 @@ const AddTransactionModal = ({ open, onClose, onSuccess, categories }: AddTransa
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={2}
+              maxLength={1000}
             />
           </div>
 

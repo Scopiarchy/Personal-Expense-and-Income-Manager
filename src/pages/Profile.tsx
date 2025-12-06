@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/hooks/useTheme";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, Mail, Save, Sun, Moon, Monitor } from "lucide-react";
+import { User, Mail, Palette, DollarSign, Sun, Moon, Monitor, Save } from "lucide-react";
 import { toast } from "sonner";
-import { useTheme } from "@/hooks/useTheme";
+import { profileSchema, getValidationError } from "@/lib/validations";
 
 interface Profile {
   id: string;
@@ -50,15 +51,13 @@ const currencies = [
 ];
 
 const Profile = () => {
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: "",
-    currency: "USD",
-  });
+  const [fullName, setFullName] = useState("");
+  const [currency, setCurrency] = useState("USD");
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     fetchProfile();
@@ -70,7 +69,7 @@ const Profile = () => {
 
     setEmail(user.email || "");
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
@@ -78,11 +77,8 @@ const Profile = () => {
 
     if (data) {
       setProfile(data);
-      setFormData({
-        full_name: data.full_name || "",
-        currency: data.currency || "USD",
-      });
-      // Apply saved theme
+      setFullName(data.full_name || "");
+      setCurrency(data.currency || "USD");
       if (data.theme) {
         setTheme(data.theme as "light" | "dark" | "system");
       }
@@ -92,31 +88,45 @@ const Profile = () => {
 
   const handleThemeChange = async (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme);
-    if (profile) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
       await supabase
         .from("profiles")
         .update({ theme: newTheme })
-        .eq("id", profile.id);
+        .eq("id", user.id);
     }
   };
 
   const handleSave = async () => {
-    if (!profile) return;
+    // Validate input
+    const result = profileSchema.safeParse({
+      full_name: fullName,
+      currency: currency,
+      theme: theme
+    });
+    
+    if (!result.success) {
+      toast.error(getValidationError(result.error));
+      return;
+    }
+    
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
     const { error } = await supabase
       .from("profiles")
       .update({
-        full_name: formData.full_name,
-        currency: formData.currency,
+        full_name: fullName.trim(),
+        currency: currency,
         theme: theme
       })
-      .eq("id", profile.id);
+      .eq("id", user.id);
 
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Profile updated!");
+      toast.success("Profile updated successfully!");
     }
     setSaving(false);
   };
@@ -153,11 +163,11 @@ const Profile = () => {
                   <Avatar className="h-20 w-20 ring-4 ring-primary/20">
                     <AvatarImage src={profile?.avatar_url || ""} />
                     <AvatarFallback className="bg-gradient-primary text-white text-2xl">
-                      {formData.full_name ? getInitials(formData.full_name) : <User className="h-8 w-8" />}
+                      {fullName ? getInitials(fullName) : <User className="h-8 w-8" />}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-semibold text-xl text-foreground">{formData.full_name || "User"}</h3>
+                    <h3 className="font-semibold text-xl text-foreground">{fullName || "User"}</h3>
                     <p className="text-muted-foreground">{email}</p>
                   </div>
                 </div>
@@ -221,8 +231,9 @@ const Profile = () => {
                     <Input
                       className="pl-10 bg-background border-border text-foreground"
                       placeholder="Your name"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      maxLength={100}
                     />
                   </div>
                 </div>
@@ -243,16 +254,16 @@ const Profile = () => {
                 <div className="space-y-2">
                   <Label className="text-foreground">Currency</Label>
                   <Select
-                    value={formData.currency}
-                    onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                    value={currency}
+                    onValueChange={(value) => setCurrency(value)}
                   >
                     <SelectTrigger className="bg-background border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-border">
-                      {currencies.map((currency) => (
-                        <SelectItem key={currency.value} value={currency.value}>
-                          {currency.label}
+                      {currencies.map((curr) => (
+                        <SelectItem key={curr.value} value={curr.value}>
+                          {curr.label}
                         </SelectItem>
                       ))}
                     </SelectContent>

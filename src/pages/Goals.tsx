@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Trash2, Target, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { goalSchema, getValidationError } from "@/lib/validations";
 
 interface Goal {
   id: string;
@@ -59,12 +60,28 @@ const Goals = () => {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const result = goalSchema.safeParse({
+      name: formData.name,
+      target_amount: parseFloat(formData.target_amount) || 0,
+      current_amount: 0,
+      deadline: formData.deadline || null,
+      color: formData.color,
+      icon: "target"
+    });
+    
+    if (!result.success) {
+      toast.error(getValidationError(result.error));
+      return;
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { error } = await supabase.from("goals").insert({
       user_id: user.id,
-      name: formData.name,
+      name: formData.name.trim(),
       target_amount: parseFloat(formData.target_amount),
       deadline: formData.deadline || null,
       color: formData.color,
@@ -85,7 +102,13 @@ const Goals = () => {
     e.preventDefault();
     if (!showContributeModal) return;
 
-    const newAmount = (showContributeModal.current_amount || 0) + parseFloat(contributeAmount);
+    const amount = parseFloat(contributeAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    const newAmount = (showContributeModal.current_amount || 0) + amount;
 
     const { error } = await supabase
       .from("goals")
@@ -223,6 +246,7 @@ const Goals = () => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                maxLength={100}
               />
             </div>
 

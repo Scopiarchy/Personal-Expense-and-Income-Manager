@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Trash2, CreditCard, Minus } from "lucide-react";
 import { toast } from "sonner";
+import { loanSchema, getValidationError } from "@/lib/validations";
 
 interface Loan {
   id: string;
@@ -60,14 +61,31 @@ const Loans = () => {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const totalAmount = parseFloat(formData.total_amount) || 0;
+    
+    // Validate input
+    const result = loanSchema.safeParse({
+      name: formData.name,
+      total_amount: totalAmount,
+      remaining_amount: totalAmount,
+      interest_rate: formData.interest_rate ? parseFloat(formData.interest_rate) : null,
+      emi_amount: formData.emi_amount ? parseFloat(formData.emi_amount) : null,
+      due_date: formData.due_date ? parseInt(formData.due_date) : null,
+      start_date: new Date().toISOString().split("T")[0]
+    });
+    
+    if (!result.success) {
+      toast.error(getValidationError(result.error));
+      return;
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const totalAmount = parseFloat(formData.total_amount);
-
     const { error } = await supabase.from("loans").insert({
       user_id: user.id,
-      name: formData.name,
+      name: formData.name.trim(),
       total_amount: totalAmount,
       remaining_amount: totalAmount,
       interest_rate: formData.interest_rate ? parseFloat(formData.interest_rate) : null,
@@ -89,7 +107,13 @@ const Loans = () => {
     e.preventDefault();
     if (!showPaymentModal) return;
 
-    const newRemaining = Math.max(0, showPaymentModal.remaining_amount - parseFloat(paymentAmount));
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    const newRemaining = Math.max(0, showPaymentModal.remaining_amount - amount);
 
     const { error } = await supabase
       .from("loans")
@@ -238,6 +262,7 @@ const Loans = () => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                maxLength={100}
               />
             </div>
 
@@ -263,6 +288,7 @@ const Loans = () => {
                   value={formData.interest_rate}
                   onChange={(e) => setFormData({ ...formData, interest_rate: e.target.value })}
                   step="0.01"
+                  max="100"
                 />
               </div>
               <div className="space-y-2">
