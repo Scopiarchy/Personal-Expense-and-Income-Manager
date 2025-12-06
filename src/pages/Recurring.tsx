@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, RefreshCw, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { recurringTransactionSchema, getValidationError } from "@/lib/validations";
 
 interface RecurringTransaction {
   id: string;
@@ -45,7 +46,7 @@ const frequencyOptions = [
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
   { value: "yearly", label: "Yearly" }
-];
+] as const;
 
 const Recurring = () => {
   const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
@@ -55,8 +56,8 @@ const Recurring = () => {
   const [formData, setFormData] = useState({
     description: "",
     amount: "",
-    type: "expense",
-    frequency: "monthly",
+    type: "expense" as "income" | "expense",
+    frequency: "monthly" as "daily" | "weekly" | "monthly" | "yearly",
     next_date: new Date().toISOString().split("T")[0],
     category_id: ""
   });
@@ -88,12 +89,28 @@ const Recurring = () => {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const result = recurringTransactionSchema.safeParse({
+      description: formData.description,
+      amount: parseFloat(formData.amount) || 0,
+      type: formData.type,
+      frequency: formData.frequency,
+      next_date: formData.next_date,
+      category_id: formData.category_id || null
+    });
+    
+    if (!result.success) {
+      toast.error(getValidationError(result.error));
+      return;
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { error } = await supabase.from("recurring_transactions").insert({
       user_id: user.id,
-      description: formData.description,
+      description: formData.description.trim(),
       amount: parseFloat(formData.amount),
       type: formData.type,
       frequency: formData.frequency,
@@ -271,6 +288,7 @@ const Recurring = () => {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
+                maxLength={500}
               />
             </div>
 
@@ -310,7 +328,7 @@ const Recurring = () => {
               <Label>Frequency</Label>
               <Select
                 value={formData.frequency}
-                onValueChange={(value) => setFormData({ ...formData, frequency: value })}
+                onValueChange={(value: "daily" | "weekly" | "monthly" | "yearly") => setFormData({ ...formData, frequency: value })}
               >
                 <SelectTrigger>
                   <SelectValue />

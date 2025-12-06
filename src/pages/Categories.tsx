@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 import { toast } from "sonner";
+import { categorySchema, getValidationError } from "@/lib/validations";
 
 interface Category {
   id: string;
@@ -44,7 +45,7 @@ const Categories = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    type: "expense",
+    type: "expense" as "income" | "expense",
     color: "#10b981",
     budget_limit: ""
   });
@@ -69,12 +70,26 @@ const Categories = () => {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const result = categorySchema.safeParse({
+      name: formData.name,
+      type: formData.type,
+      color: formData.color,
+      icon: "circle"
+    });
+    
+    if (!result.success) {
+      toast.error(getValidationError(result.error));
+      return;
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { error } = await supabase.from("categories").insert({
       user_id: user.id,
-      name: formData.name,
+      name: formData.name.trim(),
       type: formData.type,
       color: formData.color,
       icon: "circle",
@@ -270,6 +285,7 @@ const Categories = () => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                maxLength={50}
                 className="bg-background border-border text-foreground"
               />
             </div>
@@ -278,7 +294,7 @@ const Categories = () => {
               <Label className="text-foreground">Type</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value) => setFormData({ ...formData, type: value })}
+                onValueChange={(value: "income" | "expense") => setFormData({ ...formData, type: value })}
               >
                 <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />

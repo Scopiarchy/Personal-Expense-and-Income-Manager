@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { PiggyBank, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { signUpSchema, signInSchema, getValidationError } from "@/lib/validations";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -42,14 +43,22 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate input based on auth mode
       if (isSignUp) {
+        const result = signUpSchema.safeParse(formData);
+        if (!result.success) {
+          toast.error(getValidationError(result.error));
+          setLoading(false);
+          return;
+        }
+
         const { error } = await supabase.auth.signUp({
-          email: formData.email,
+          email: formData.email.trim(),
           password: formData.password,
           options: {
             emailRedirectTo: `${window.location.origin}/dashboard`,
             data: {
-              full_name: formData.fullName
+              full_name: formData.fullName.trim()
             }
           }
         });
@@ -57,8 +66,15 @@ const Auth = () => {
         if (error) throw error;
         toast.success("Account created! Please check your email to verify.");
       } else {
+        const result = signInSchema.safeParse(formData);
+        if (!result.success) {
+          toast.error(getValidationError(result.error));
+          setLoading(false);
+          return;
+        }
+
         const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
+          email: formData.email.trim(),
           password: formData.password
         });
 
