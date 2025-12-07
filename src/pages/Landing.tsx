@@ -77,23 +77,23 @@ const Landing = () => {
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={toggleTheme}
-              className="rounded-full"
+              className="rounded-full h-9 w-9 sm:h-10 sm:w-10"
             >
               {resolvedTheme === "dark" ? (
-                <Sun className="h-5 w-5 text-yellow-500" />
+                <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
               ) : (
-                <Moon className="h-5 w-5 text-slate-700" />
+                <Moon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-700" />
               )}
             </Button>
             <Link to="/auth">
-              <Button variant="ghost">Sign In</Button>
+              <Button variant="ghost" className="text-sm sm:text-base px-2 sm:px-4">Sign In</Button>
             </Link>
-            <Link to="/auth?signup=true">
+            <Link to="/auth?signup=true" className="hidden sm:block">
               <Button className="bg-gradient-primary hover:opacity-90">Get Started</Button>
             </Link>
           </div>
