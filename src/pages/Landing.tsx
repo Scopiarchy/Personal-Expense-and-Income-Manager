@@ -178,17 +178,17 @@ const Landing = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <Card className="border-0 bg-gradient-to-r from-primary to-secondary p-1 rounded-3xl">
-            <div className="bg-background rounded-[22px] p-8 md:p-12 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <div className="bg-background rounded-[22px] p-6 sm:p-8 md:p-12 text-center">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
                 Ready to take control?
               </h2>
-              <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
+              <p className="text-muted-foreground text-base sm:text-lg mb-6 sm:mb-8 max-w-xl mx-auto">
                 Join thousands of users who have transformed their financial habits with ExpenseTracker.
               </p>
               <Link to="/auth?signup=true">
-                <Button size="lg" className="bg-gradient-primary hover:opacity-90 h-14 px-8 text-lg">
+                <Button size="lg" className="bg-gradient-primary hover:opacity-90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto">
                   Get Started for Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </Link>
             </div>
