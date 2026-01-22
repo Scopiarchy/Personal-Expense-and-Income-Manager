@@ -1,73 +1,114 @@
-# Welcome to your Lovable project
+# 💰 Personal Expense and Income Manager
 
-## Project info
+A simple and user-friendly **Personal Expense and Income Manager** that helps users track daily expenses, manage income sources, and understand their financial habits through organized records and summaries. This project is ideal for students and individuals who want a lightweight financial management system.
 
-**URL**: https://lovable.dev/projects/f4807a5b-31db-484c-b1f0-da535636eea3
+---
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+* ➕ Add income records
+* ➖ Add expense records
+* 🗂️ Categorize income and expenses
+* 📊 View total income, total expenses, and balance
+* 🕒 Track transactions by date
+* 🔐 Simple and clean interface
+* 📱 Responsive design (works on desktop & mobile)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f4807a5b-31db-484c-b1f0-da535636eea3) and start prompting.
+## 🛠️ Technologies Used
 
-Changes made via Lovable will be committed automatically to this repo.
+* **Frontend:** HTML, CSS, JavaScript
+* **Backend:** JavaScript (if applicable)
+* **Database:** Local storage / Supabase (based on implementation)
+* **Tools:** Git, GitHub
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📂 Project Structure
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+Personal-Expense-and-Income-Manager/
+│
+├── index.html        # Main UI
+├── css/              # Stylesheets
+│   └── style.css
+├── js/               # JavaScript logic
+│   └── script.js
+├── assets/           # Images / icons
+├── README.md         # Project documentation
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## ⚙️ Installation & Setup
 
-**Use GitHub Codespaces**
+1. Clone the repository
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+   ```bash
+   git clone https://github.com/your-username/Personal-Expense-and-Income-Manager.git
+   ```
 
-## What technologies are used for this project?
+2. Navigate to the project folder
 
-This project is built with:
+   ```bash
+   cd Personal-Expense-and-Income-Manager
+   ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+3. Open `index.html` in your browser
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/f4807a5b-31db-484c-b1f0-da535636eea3) and click on Share -> Publish.
+## 📸 Screenshots
 
-## Can I connect a custom domain to my Lovable project?
+> *(Add screenshots of your application UI here)*
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🎯 Use Case
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+* Students managing daily expenses
+* Individuals tracking monthly income vs spending
+* Beginner-friendly finance tracking project
+* Academic / portfolio project
+
+---
+
+## 📈 Future Improvements
+
+* User authentication
+* Monthly and yearly reports
+* Charts and visual analytics
+* Export data to PDF / Excel
+* Cloud database integration
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a new branch (`feature/new-feature`)
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+## 👤 Author
+
+**Dimuthu Shalinda**
+
+* GitHub: https://github.com/Scopiarchy
+* LinkedIn: https://www.linkedin.com/in/dimuthu%20shalinda
+
+---
+
+⭐ If you like this project, give it a star on GitHub!
